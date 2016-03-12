@@ -4,38 +4,44 @@
 @section('title', 'Room type list')
 
 @section('content')
-@if (count($errors) > 0)
 
-<div class="alert alert-danger">
-    <ul>
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
+@if(Session::has('flash_message'))
+<div id="alert" class="alert alert-success">
+    {{ Session::get('flash_message') }}
 </div>
 @endif
-<form action="/roomtype" method="POST" class="form-inline text-right">
-    <div class="form-group">
-        <input type="text" name="name" class="form-control">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-    </div>
-    <input type="submit" value="Submit" class="btn btn-default">
-</form>
+
+<div id="top" class="form-group text-right">
+    <a href="/roomtype/add" class="btn btn-default">Add room type</a>
+</div>
+
 <table style="margin-top: 10px;" class="table table-striped">
     <tr>
         <th>#</th>
         <th>name</th>
-        <th>created_at</th>
-        <th>updated_at</th>
+        <th>daily_price</th>
+        <th>monthly_price</th>
+        <th>action</th>
+
     </tr>
     @foreach ($roomTypes as $roomType)
     <tr>
         <td>{{$roomType->id}}</td>
         <td>{{$roomType->name}}</td>
-        <td>{{$roomType->created_at}}</td>
-        <td>{{$roomType->updated_at}}</td>
+        <td>{{$roomType->daily_price}}</td>
+        <td>{{$roomType->monthly_price}}</td>
+        <td>
+            <form action="/roomtype/{{$roomType->id}}" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="_method" value="DELETE">
+                <a style="text-decoration: none" href="/roomtype/{{$roomType->slug}}/edit" class="btn"><span class="glyphicon glyphicon-edit"></span></a>
+                <button style="background-color: transparent; border: none" type="submit" id="{{$roomType->id}}" class="deleteBtn" ><span class="glyphicon glyphicon-remove-circle"></span></button>
+            </form>
+        </td>
     </tr>
-    @endforeach
+@endforeach
 </table>
-
+<script type="text/javascript">
+    $('#alert').delay(3000).fadeOut()
+</script>
 @endsection

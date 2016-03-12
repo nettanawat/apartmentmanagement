@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Src\Dao\RoomTypeDaoImpl;
-use App\Src\Models\RoomType;
+use App\Src\Models\Floor;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -11,7 +10,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 
-class RoomTypeController extends Controller
+
+class FloorController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,8 +20,7 @@ class RoomTypeController extends Controller
      */
     public function index()
     {
-       $roomTypes = RoomType::all();
-        return view('roomtype.roomTypeList', ['roomTypes' => $roomTypes]);
+        return view('floor.floorList', ['floors' => Floor::all()]);
     }
 
     /**
@@ -31,7 +30,7 @@ class RoomTypeController extends Controller
      */
     public function create()
     {
-        return view('roomtype.addRoomType');
+        return view('floor.addFloor');
     }
 
     /**
@@ -44,19 +43,18 @@ class RoomTypeController extends Controller
     {
         // Validate
         $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:room_types|between:2,20',
-            'daily_price' => 'numeric',
-            'monthly_price' => 'numeric'
+            'name' => 'required|unique:floors|max:10'
         ]);
         if($validator->fails()){
             return back()->withErrors($validator)->withInput();
         }
 
-        $roomTypeDaoImpl = new RoomTypeDaoImpl();
-        $roomTypeDaoImpl->addRoomType($request);
-
+        $floor = new Floor();
+        $floor->name = $request->get('name');
+        $floor->slug = str_slug($request->get('name'));
+        $floor->save();
         Session::flash('flash_message', 'Task successfully added!');
-        return redirect('roomtype');
+        return redirect('floor');
     }
 
     /**
@@ -65,9 +63,9 @@ class RoomTypeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show($id)
     {
-
+        //
     }
 
     /**
@@ -78,9 +76,8 @@ class RoomTypeController extends Controller
      */
     public function edit($slug)
     {
-        $roomTypeDaoImpl = new RoomTypeDaoImpl();
-        $roomType = $roomTypeDaoImpl->findRoomTypeBySlug($slug);
-        return view('roomtype.addRoomType', ['roomType' => $roomType]);
+        $floor = Floor::whereSlug($slug)->first();
+        return view('floor.addFloor', ['floor' => $floor]);
     }
 
     /**
@@ -94,18 +91,18 @@ class RoomTypeController extends Controller
     {
         // Validate
         $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:room_types|between:2,20',
-            'daily_price' => 'numeric',
-            'monthly_price' => 'numeric'
+            'name' => 'required|unique:floors|max:10'
         ]);
         if($validator->fails()){
             return back()->withErrors($validator)->withInput();
         }
 
-        $roomTypeDaoImpl = new RoomTypeDaoImpl();
-        $roomTypeDaoImpl->editRoomType($request, $id);
-        Session::flash('flash_message', 'Task successfully added!');
-        return redirect('roomtype');
+        $floor = Floor::findOrNew($id);
+        $floor->name = $request->get('name');
+        $floor->slug = str_slug($request->get('name'));
+        $floor->save();
+        Session::flash('flash_message', 'Task successfully updated!');
+        return redirect('floor');
     }
 
     /**
@@ -116,14 +113,12 @@ class RoomTypeController extends Controller
      */
     public function destroy($id)
     {
-        $roomTypeDaoImpl = new RoomTypeDaoImpl();
-        $roomType = $roomTypeDaoImpl->deleteRoomType($id);
+        $floor = Floor::destroy($id);
         Session::flash('flash_message', 'Task successfully delete!');
         return redirect()->back();
     }
 
-    public function allRoomType(){
-        $roomTypes = RoomType::all();
-        return $roomTypes;
+    public function allFloor(){
+        return Floor::all();
     }
 }

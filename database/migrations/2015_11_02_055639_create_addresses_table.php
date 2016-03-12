@@ -14,12 +14,15 @@ class CreateAddressesTable extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('address_line1', 255);
-            $table->string('address_line2', 255)->nullable();
+            $table->string('address_line1', 100);
+            $table->string('address_line2', 100)->nullable();
             $table->string('city', 45);
-            $table->string('province', 255);
+            $table->string('province', 45);
             $table->string('post_code', 10);
             $table->timestamps();
+
+            $table->integer('customer_id')->unsigned();
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
         });
     }
 
